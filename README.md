@@ -21,8 +21,8 @@ By open-sourcing this MCP server, we aim to support the researchers of the Plane
 1. Clone this repository:
 
 ```bash
-git clone <your-repo-url>
-cd pds_mcp
+git clone https://github.com/NASA-PDS/pds-mcp.git
+cd pds-mcp
 ```
 
 2. Install dependencies:
@@ -57,19 +57,7 @@ Add this to your MCP client configuration (e.g., Claude Desktop):
 
 ## Development
 
-## Adding New Tools
-
-To add a new tool, simply create a new function with the `@mcp.tool()` decorator:
-
-```python
-@mcp.tool()
-async def my_new_tool(input: MyInputModel) -> str:
-    """Description of what this tool does"""
-    # Your implementation here
-    return "Result"
-```
-
-## Contributing
+### Contributing
 
 1. Fork the repository
 2. Create a feature branch
