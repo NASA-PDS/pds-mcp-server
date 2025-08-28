@@ -57,6 +57,14 @@ Add this to your MCP client configuration (e.g., Claude Desktop):
 
 ## Development
 
+### MCP Inspector (Debugging)
+
+```bash
+npx @modelcontextprotocol/inspector python src/main.py
+```
+
+More on MCP Inspector [here](https://modelcontextprotocol.io/legacy/tools/inspector).
+
 ### Contributing
 
 1. Fork the repository
