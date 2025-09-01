@@ -15,7 +15,7 @@ Observationals are the "labels" or metadata for actual NASA data.
 
 @mcp.tool()
 async def search_investigations(
-    keywords: list[str],
+    keywords: list[str] | None,
     limit: int = 10
 ) -> str:
     """
@@ -61,6 +61,8 @@ async def search_investigations(
         return f"HTTP error occurred: {e.response.status_code} - {e.response.text}"
     except Exception as e:
         return f"Error occurred: {str(e)}"
+
+
 
 
 if __name__ == "__main__":
