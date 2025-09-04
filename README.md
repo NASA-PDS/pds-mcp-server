@@ -73,6 +73,10 @@ More on MCP Inspector [here](https://modelcontextprotocol.io/legacy/tools/inspec
 4. Add tests if applicable
 5. Submit a pull request
 
+## Dependencies
+
+Requires Python 3.12.9+. Library dependencies listed in `requirements.txt`.
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
