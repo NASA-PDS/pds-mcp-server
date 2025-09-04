@@ -214,5 +214,39 @@ async def search_instrument_hosts(
     except Exception as e:
         return f"Error occurred: {str(e)}"
 
+@mcp.tool()
+async def crawl_context_product(urn: str):
+    """
+    Crawl a single PDS Context product and return other PDS Context products it is associated with.
+    Ex. Mars 2020: Perseverance Rover (Investigation) is associated with Mars (Target) and Mastcam (Instrument).
+    
+    Args:
+        keywords: string of several keywords delimited by spaces to search PDS products (ex. 'moon jupiter titan')
+        target_type: type of PDS Context Target (eligible types are in this resource: resource://instrument_host_type)
+        limit (int): Maximum number of matching results returned, for pagination
+    
+    Returns:
+        JSON string containing the search results
+    """
+    
+    headers = {"Accept": "application/json"}
+    base_url = f"https://pds.mcp.nasa.gov/api/search/1/products/{urn}"
+        
+    api_url = build_search_url(base_url, SearchParams())
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(api_url, headers=headers)
+            response.raise_for_status()
+            response = response.json()
+            # response["API_URL"] = api_url
+            subset_fields = ("investigations", "observing_system_components", "targets", "title", "id", "pds:Investigation.pds:description", "pds:Target.pds:description", "pds:Instrument_Host.pds:description", "pds:Instrument.pds:description")
+            response = {k: v for k,v in response.items() if k in subset_fields}
+            return json.dumps(response, indent=2)
+    except httpx.HTTPStatusError as e:
+        return f"HTTP error occurred: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error occurred: {str(e)}"
+
 if __name__ == "__main__":
     mcp.run()
