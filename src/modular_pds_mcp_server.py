@@ -96,6 +96,14 @@ def list_target_types():
         "Magnetic Field"
     ]
 
+
+@mcp.resource("resource://instrument_host_type")
+def list_instrument_hosts():
+    """
+    List of possible Instrument Host types from PDS Context Products
+    """
+    return ["Rover", "Lander", "Spacecraft"]
+
 @mcp.tool()
 async def search_targets(
     keywords: str | None = None,
@@ -120,7 +128,6 @@ async def search_targets(
     headers = {"Accept": "application/kvp+json"}
 
     q_str = rf'(product_class eq "Product_Context" and lid like "urn:nasa:pds:context:target:*")'
-
     
     if keywords:
         keyword_query = f'((title like "{keywords}") or (pds:Target.pds:description like "{keywords}"))'
@@ -153,8 +160,59 @@ async def search_targets(
 
 
 
+@mcp.tool()
+async def search_instrument_hosts(
+    keywords: str | None = None,
+    instrument_host_type: str | None = None,
+    limit: int = 10
+) -> str:
+    """
+    Search the latest-versioned instances of PDS Context products that are Instrument Hosts.
+    
+    Args:
+        keywords: string of several keywords delimited by spaces to search PDS products (ex. 'moon jupiter titan')
+        target_type: type of PDS Context Target (eligible types are in this resource: resource://instrument_host_type)
+        limit (int): Maximum number of matching results returned, for pagination
+    
+    Returns:
+        JSON string containing the search results
+    """
 
+    base_url = "https://pds.mcp.nasa.gov/api/search/1/products"
 
+    # list investigations
+    headers = {"Accept": "application/json"}
+
+    q_str = rf'(product_class eq "Product_Context" and lid like "urn:nasa:pds:context:instrument_host:*")'
+    
+    if keywords:
+        keyword_query = f'((title like "{keywords}") or (pds:Instrument_Host.pds:description like "{keywords}"))'
+        q_str = f"'({q_str} and {keyword_query})'"
+    
+    if instrument_host_type:
+        q_str = f'({q_str} and ((pds:Target.pds:type like "{instrument_host_type}")))'
+
+    api_url = build_search_url(base_url, SearchParams(
+        query=q_str,
+        fields=["pds:Instrument_Host.pds:type", "pds:Instrument_Host.pds:description"],
+        limit=limit,
+        sort="",
+        search_after="",
+        facet_fields="",
+        facet_limit=""
+    ))
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(api_url, headers=headers)
+            response.raise_for_status()
+            response = response.json()
+            response["API_URL"] = api_url
+            return json.dumps(response, indent=2)
+    except httpx.HTTPStatusError as e:
+        return f"HTTP error occurred: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error occurred: {str(e)}"
 
 if __name__ == "__main__":
     mcp.run()
