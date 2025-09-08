@@ -1,7 +1,7 @@
 import httpx
 from fastmcp import FastMCP
 from fastmcp.resources import FileResource
-from typing import List, Union
+from typing import List, Union, Annotated
 import json
 
 from utils import build_search_url, SearchParams
@@ -16,8 +16,8 @@ Observationals are the "labels" or metadata for actual NASA data. Every PDS4 fil
 # TODO filters (dates, investigation types)
 @mcp.tool()
 async def search_investigations(
-    keywords: list[str] | None = None,
-    limit: int = 10
+    keywords: str | None = None,
+    limit: Annotated[int, "max limit is 10"] = 10
 ) -> str:
     """
     Search the latest-versioned instances of PDS Context products that are Investigations.
@@ -26,7 +26,7 @@ async def search_investigations(
     Search results include title, URN, description, mission start and stop dates, type.
     
     Args:
-        keywords: list of keywords to search PDS products
+        keywords: string of several keywords delimited by spaces to search PDS products (ex. 'moon jupiter titan')
         limit (int): Maximum number of matching results returned, for pagination
    
     Returns:
@@ -47,7 +47,7 @@ async def search_investigations(
 
     api_url = build_search_url(base_url, SearchParams(
         query=q_str,
-        fields=["title", "lid", "pds:Investigation.pds:stop_date", "pds:Investigation.pds:start_date", "pds:Investigation.pds:type", "pds:Investigation.pds:description"],
+        fields=["title", "lid", "pds:Investigation.pds:stop_date", "pds:Investigation.pds:start_date", "pds:Investigation.pds:type"],
         limit=limit,
         sort="",
         search_after="",
@@ -108,7 +108,7 @@ def list_instrument_hosts():
 async def search_targets(
     keywords: str | None = None,
     target_type: str | None = None,
-    limit: int = 10
+    limit: Annotated[int, "max limit is 10"] = 10
 ) -> str:
     """
     Search the latest-versioned instances of PDS Context products that are Targets.
@@ -138,7 +138,7 @@ async def search_targets(
 
     api_url = build_search_url(base_url, SearchParams(
         query=q_str,
-        fields=["title", "lid", "pds:Target.pds:type", "pds:Alias.pds:alternate_title", "pds:Target.pds:description"],
+        fields=["title", "lid", "pds:Target.pds:type", "pds:Alias.pds:alternate_title"],
         limit=limit,
         sort="",
         search_after="",
@@ -151,7 +151,7 @@ async def search_targets(
             response = await client.get(api_url, headers=headers)
             response.raise_for_status()
             response = response.json()
-            response["API_URL"] = api_url
+            # response["API_URL"] = api_url
             return json.dumps(response, indent=2)
     except httpx.HTTPStatusError as e:
         return f"HTTP error occurred: {e.response.status_code} - {e.response.text}"
@@ -164,7 +164,7 @@ async def search_targets(
 async def search_instrument_hosts(
     keywords: str | None = None,
     instrument_host_type: str | None = None,
-    limit: int = 10
+    limit: Annotated[int, "max limit is 10"] = 10
 ) -> str:
     """
     Search the latest-versioned instances of PDS Context products that are Instrument Hosts.
@@ -194,7 +194,7 @@ async def search_instrument_hosts(
 
     api_url = build_search_url(base_url, SearchParams(
         query=q_str,
-        fields=["pds:Instrument_Host.pds:type", "pds:Instrument_Host.pds:description"],
+        fields=["pds:Instrument_Host.pds:type"],
         limit=limit,
         sort="",
         search_after="",
@@ -240,8 +240,10 @@ async def crawl_context_product(urn: str):
             response.raise_for_status()
             response = response.json()
             # response["API_URL"] = api_url
-            subset_fields = ("investigations", "observing_system_components", "targets", "title", "id", "pds:Investigation.pds:description", "pds:Target.pds:description", "pds:Instrument_Host.pds:description", "pds:Instrument.pds:description")
+            subset_fields = ("investigations", "observing_system_components", "targets", "title", "id", "pds:Target.pds:description", "pds:Instrument_Host.pds:description", "pds:Instrument.pds:description")
             response = {k: v for k,v in response.items() if k in subset_fields}
+
+            # bulk api call ? 
             return json.dumps(response, indent=2)
     except httpx.HTTPStatusError as e:
         return f"HTTP error occurred: {e.response.status_code} - {e.response.text}"
