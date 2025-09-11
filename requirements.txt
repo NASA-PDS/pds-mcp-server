@@ -6,3 +6,4 @@ gradio>=5.44.1
 gradio_client>=1.12.1
 smolagents>=1.21.3
 python-dotenv>=1.1.1
+requests>=2.32.3

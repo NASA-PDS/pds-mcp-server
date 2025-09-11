@@ -26,7 +26,7 @@ def build_search_url(base_url: str, params: SearchParams) -> str:
     if params.get("search_after"):
         query_params["search-after"] = ",".join(params["search_after"])
     if params.get("facet_fields"):
-        query_params["facet-fields"] = params["facet_fields"]
+        query_params["facet-fields"] = ",".join(params["facet_fields"])
     if params.get("facet_limit") is not None:
         query_params["facet-limit"] = params["facet_limit"]
     
