@@ -50,7 +50,7 @@ Add this to your MCP client configuration (e.g., Claude Desktop):
 {
   "mcpServers": {
     "pds-registry": {
-      "command": "python",
+      "command": "/path/to/python",
       "args": ["/path/to/pds_mcp_server.py"],
       "env": {}
     }
