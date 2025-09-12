@@ -10,11 +10,14 @@ By open-sourcing this MCP server, we aim to support the researchers of the Plane
 
 ## Features
 
-- **Product Search**: Search for PDS products using various filters
-- **Product Details**: Get detailed information about specific products from their XML label
-- **Hierarchy Navigation**: Explore product relationships (members, member-of)
-- **Product Classes**: List all available product classes (bundles, collections, observationals)
-- **Download Links**: Retrieve direct download URLs for product data files and associated resources
+- **Mission & Project Search**: Find space missions, investigations, and research projects with filtering by keywords and mission types
+- **Celestial Body Discovery**: Search for planets, moons, asteroids, comets, and other astronomical targets by name or type
+- **Spacecraft & Platform Search**: Locate spacecraft, rovers, landers, telescopes, and other instrument-carrying platforms
+- **Scientific Instrument Lookup**: Find cameras, spectrometers, detectors, and other scientific instruments used in space missions
+- **Data Collection Exploration**: Search and filter data collections by mission, target, instrument, or spacecraft relationships
+- **Product Relationship Mapping**: Discover connections between missions, targets, instruments, and data products
+- **Detailed Product Information**: Retrieve comprehensive metadata and details for specific PDS products using URN identifiers
+- **Reference Data Access**: Access categorized lists of target types, spacecraft types, instrument types, and mission types for filtering and discovery
 
 ### Example Conversation
 
