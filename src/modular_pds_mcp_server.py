@@ -296,6 +296,8 @@ async def crawl_context_product(urn: str):
     """
     Crawl a single PDS Context product and return other PDS Context products it is associated with.
     Ex. Mars 2020: Perseverance Rover (Investigation) is associated with Mars (Target) and Mastcam (Instrument), so it returns Mars and Mastcam.
+
+    WARNING: Takes a long time to run and performs several sequential API calls. Use wisely.
     
     Args:
         keywords: string of several keywords delimited by spaces to search PDS products (ex. 'moon jupiter titan')
@@ -359,6 +361,71 @@ async def crawl_context_product(urn: str):
                 print(f"Failed to fetch {href}: {resp.status_code}")
 
     return json.dumps(results, indent=2)
+
+@mcp.tool()
+async def search_collections(
+    ref_lid_instrument: str | None = None,
+    ref_lid_target: str | None = None,
+    ref_lid_instrument_host: str | None = None,
+    ref_lid_investigation: str | None = None,
+    limit: int = 10
+) -> str:
+    """
+    Search PDS data collections filtered by instrument, target, instrument host, or investigation.
+    Example: Mars Reconnaissance Orbiter HiRISE data collections targeting Mars.
+    
+    Args:
+        ref_lid_instrument (str): URN identifier for instrument (e.g. urn:nasa:pds:context:instrument:mars2020.mastcamz)
+        ref_lid_target (str): URN identifier for target (e.g. urn:nasa:pds:context:target:planet.mars)
+        ref_lid_instrument_host (str): URN identifier for instrument host (e.g. urn:nasa:pds:context:instrument_host:spacecraft.mars2020)
+        ref_lid_investigation (str): URN identifier for investigation (e.g. urn:nasa:pds:context:investigation:mission.mars2020)
+        limit (int): Max results (default 10)
+    """
+
+    base_url = "https://pds.mcp.nasa.gov/api/search/1/products"
+    headers = {"Accept": "application/kvp+json"}
+
+    # Base query for Product_Collection
+    q_str = r'(product_class eq "Product_Collection")'
+    
+    # Add filters for each provided parameter
+    filters = []
+    
+    if ref_lid_instrument:
+        filters.append(f'(ref_lid_instrument eq "{ref_lid_instrument}")')
+    
+    if ref_lid_target:
+        filters.append(f'(ref_lid_target eq "{ref_lid_target}")')
+    
+    if ref_lid_instrument_host:
+        filters.append(f'(ref_lid_instrument_host eq "{ref_lid_instrument_host}")')
+    
+    if ref_lid_investigation:
+        filters.append(f'(ref_lid_investigation eq "{ref_lid_investigation}")')
+    
+    # Combine all filters
+    if filters:
+        q_str = f'({q_str} and {" and ".join(filters)})'
+
+    api_url = build_search_url(base_url, SearchParams(
+        query=q_str,
+        fields=["title", "lid", "ref_lid_instrument", "ref_lid_target", "ref_lid_instrument_host", "ref_lid_investigation", "ops:Label_File_Info.ops:file_ref"],
+        limit=limit,
+        sort="",
+        search_after="",
+        facet_fields="",
+        facet_limit=""
+    ))
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(api_url, headers=headers)
+            response.raise_for_status()
+            return json.dumps(response.json()['data'], indent=2)
+    except httpx.HTTPStatusError as e:
+        return f"HTTP error occurred: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Error occurred: {str(e)}"
 
 @mcp.tool()
 async def get_product(urn: str) -> str:
