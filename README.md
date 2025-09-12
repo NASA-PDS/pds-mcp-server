@@ -2,6 +2,9 @@
 
 A Model Context Protocol (MCP) server that provides access to the NASA Planetary Data System (PDS) Registry API using FastMCP.
 
+<img width="512" height="322" alt="image" src="https://github.com/user-attachments/assets/55d3b3ce-2ac2-4359-a23f-1b1d55efd648" />
+
+
 ## Overview
 
 This MCP server enables AI assistants to search and explore NASA PDS data products, bundles, and collections through a simple interface. It directly integrates with the PDS Registry API at `https://pds.mcp.nasa.gov/api/search/1/`.
