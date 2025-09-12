@@ -78,7 +78,7 @@ More on MCP Inspector [here](https://modelcontextprotocol.io/legacy/tools/inspec
 
 ## Dependencies
 
-Requires Python 3.12.9+. Library dependencies listed in `requirements.txt`.
+Requires Python 3.13+. Library dependencies listed in `requirements.txt`.
 
 ## License
 
