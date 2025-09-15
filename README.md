@@ -2,6 +2,9 @@
 
 A Model Context Protocol (MCP) server that provides access to the NASA Planetary Data System (PDS) Registry API using FastMCP.
 
+<img width="512" height="322" alt="image" src="https://github.com/user-attachments/assets/55d3b3ce-2ac2-4359-a23f-1b1d55efd648" />
+
+
 ## Overview
 
 This MCP server enables human-in-the-loop agentic search and exploration of NASA PDS data products, bundles, and collections through a simple interface. It directly integrates with the [NASA PDS Registry API](https://nasa-pds.github.io/pds-api/).
@@ -95,6 +98,10 @@ More on MCP Inspector [here](https://modelcontextprotocol.io/legacy/tools/inspec
 3. Make your changes
 4. Add tests if applicable
 5. Submit a pull request
+
+## Dependencies
+
+Requires Python 3.13+. Library dependencies listed in `requirements.txt`.
 
 ## License
 
