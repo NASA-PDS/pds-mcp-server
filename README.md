@@ -38,15 +38,18 @@ cd pds-mcp
 2. Install dependencies:
 
 ```bash
+python3.13 -m venv {env-name}
+source pds-env/bin/activate
 pip install -r requirements.txt
 ```
+Requires Python 3.13+.
 
 ## Usage
 
 ### Running the Server
 
 ```bash
-python pds_mcp_server.py
+python3.13 pds_mcp_server.py
 ```
 
 ### MCP Client Configuration
@@ -57,7 +60,7 @@ Add this to your MCP client configuration (e.g., Claude Desktop):
 {
   "mcpServers": {
     "pds-registry": {
-      "command": "python",
+      "command": "/path/to/{env-name}/bin/python3.13",
       "args": ["/path/to/pds_mcp_server.py"],
       "env": {}
     }
