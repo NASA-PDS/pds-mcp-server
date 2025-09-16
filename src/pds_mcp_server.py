@@ -421,7 +421,19 @@ async def search_collections(
         async with httpx.AsyncClient() as client:
             response = await client.get(api_url, headers=headers)
             response.raise_for_status()
-            return json.dumps(response.json()['data'], indent=2)
+            data = response.json()['data']
+            for item in data:
+                if 'ops:Label_File_Info.ops:file_ref' in item:
+                    file_ref = item['ops:Label_File_Info.ops:file_ref']
+                    # Remove the filename and go one level up to the directory
+                    if file_ref:
+                        # Split by '/' and remove the last part (filename), then rejoin
+                        path_parts = file_ref.split('/')
+                        if len(path_parts) > 1:
+                            # Remove the last part (filename) to get the directory
+                            directory_path = '/'.join(path_parts[:-1])
+                            item['ops:Label_File_Info.ops:file_ref'] = directory_path
+            return json.dumps(data, indent=2)
     except httpx.HTTPStatusError as e:
         return f"HTTP error occurred: {e.response.status_code} - {e.response.text}"
     except Exception as e:
