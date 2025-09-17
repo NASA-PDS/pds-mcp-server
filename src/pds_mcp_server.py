@@ -1,13 +1,11 @@
 import httpx
 import requests
 from fastmcp import FastMCP
-from fastmcp.resources import FileResource
-from typing import List, Union, Annotated
+from typing import Union
 import json
 
-from utils import build_search_url, SearchParams
+from utils import build_search_url, SearchParams, clean_urn
 
-# TODO add better system prompt
 mcp = FastMCP("Planetary Data System MCP Server", """
 This MCP server provides access to NASA's Planetary Data System (PDS) Registry API. The NASA PDS is a collection of XML files following
 the PDS4 standard and are organized into three hierarchical levels: bundles, collections, and observationals, in that order. 
@@ -15,10 +13,9 @@ Observationals are the "labels" or metadata for actual NASA data. Every PDS4 fil
 (ex. urn:nasa:pds:context:investigation:mission.juno is the URN for the Juno Mission).
 """)
 
-# TODO add investigation type
 @mcp.tool()
 async def search_investigations(
-    keywords: str | None = None,
+    keywords: str | None = "",
     limit: int = 10
 ) -> str:
     """
@@ -121,8 +118,8 @@ def list_investigation_type():
 
 @mcp.tool()
 async def search_targets(
-    keywords: str | None = None,
-    target_type: str | None = None,
+    keywords: str | None = "",
+    target_type: str | None  = "",
     limit: int = 10
 ) -> str:
     """
@@ -176,12 +173,11 @@ async def search_targets(
         return f"Error occurred: {str(e)}"
 
 
-# TODO ex. questions
-# TODO ex. context products
+
 @mcp.tool()
 async def search_instrument_hosts(
-    keywords: str | None = None,
-    instrument_host_type: str | None = None,
+    keywords: str | None = "",
+    instrument_host_type: str | None = "",
     limit: int = 10
 ) -> str:
     """
@@ -237,8 +233,8 @@ async def search_instrument_hosts(
 
 @mcp.tool()
 async def search_instruments(
-    keywords: str | None = None,
-    instrument_type: str | None = None,
+    keywords: str | None = "",
+    instrument_type: str | None = "",
     limit: int = 10
 ) -> str:
     """
@@ -311,7 +307,9 @@ async def crawl_context_product(urn: str):
     headers = {"Accept": "application/json"}
     base_url = "https://pds.mcp.nasa.gov/api/search/1/products"
 
-    api_url = base_url+f"/{urn}"
+    # Clean the URN to remove version information
+    clean_urn_id = clean_urn(urn)
+    api_url = base_url+f"/{clean_urn_id}"
 
     # print(api_url)
     response = requests.get(api_url, headers=headers)
@@ -364,10 +362,10 @@ async def crawl_context_product(urn: str):
 
 @mcp.tool()
 async def search_collections(
-    ref_lid_instrument: str | None = None,
-    ref_lid_target: str | None = None,
-    ref_lid_instrument_host: str | None = None,
-    ref_lid_investigation: str | None = None,
+    ref_lid_instrument: str | None = "",
+    ref_lid_target: str | None = "",
+    ref_lid_instrument_host: str | None  = "",
+    ref_lid_investigation: str | None = "",
     limit: int = 10
 ) -> str:
     """
@@ -392,16 +390,20 @@ async def search_collections(
     filters = []
     
     if ref_lid_instrument:
-        filters.append(f'(ref_lid_instrument eq "{ref_lid_instrument}")')
+        clean_instrument = clean_urn(ref_lid_instrument)
+        filters.append(f'(ref_lid_instrument eq "{clean_instrument}")')
     
     if ref_lid_target:
-        filters.append(f'(ref_lid_target eq "{ref_lid_target}")')
+        clean_target = clean_urn(ref_lid_target)
+        filters.append(f'(ref_lid_target eq "{clean_target}")')
     
     if ref_lid_instrument_host:
-        filters.append(f'(ref_lid_instrument_host eq "{ref_lid_instrument_host}")')
+        clean_host = clean_urn(ref_lid_instrument_host)
+        filters.append(f'(ref_lid_instrument_host eq "{clean_host}")')
     
     if ref_lid_investigation:
-        filters.append(f'(ref_lid_investigation eq "{ref_lid_investigation}")')
+        clean_investigation = clean_urn(ref_lid_investigation)
+        filters.append(f'(ref_lid_investigation eq "{clean_investigation}")')
     
     # Combine all filters
     if filters:
@@ -446,7 +448,10 @@ async def get_product(urn: str) -> str:
     """
     headers = {"Accept": "application/json"}
     base_url = "https://pds.mcp.nasa.gov/api/search/1/products"
-    api_url = base_url+f"/{urn}"
+    
+    # Clean the URN to remove version information
+    clean_urn_id = clean_urn(urn)
+    api_url = base_url+f"/{clean_urn_id}"
     response = requests.get(api_url, headers=headers)
     response = response.json()
     return json.dumps(response, indent=2)
