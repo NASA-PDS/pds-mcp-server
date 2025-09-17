@@ -34,30 +34,41 @@ By open-sourcing this MCP server, we aim to support the researchers of the Plane
 1. Clone this repository:
 
 ```bash
-git clone https://github.com/NASA-PDS/pds-mcp.git
-cd pds-mcp
+git clone https://github.com/NASA-PDS/pds-mcp-server.git
+cd pds-mcp-server
 ```
 
 2. Install dependencies:
 
+Requires Python 3.13+.
+
 ```bash
 python3.13 -m venv {env-name}
-source pds-env/bin/activate
+source {env-name}/bin/activate
 pip install -r requirements.txt
 ```
-Requires Python 3.13+.
 
 ## Usage
 
-### Running the Server
+We propose 3 usage for the PDS MCP services:
+- Standalone server
+- Integrated with a 3rd party client software or application (Claude Desktop, gradio, ...)
+
+
+
+### Running the Server Standalone
+
+If you need to expose the MCP tools as a server, you can run it, standalone, as follows:
 
 ```bash
 python3.13 pds_mcp_server.py
 ```
 
-### MCP Client Configuration
+### Integrated with MCP client software 
 
-Add this to your MCP client configuration (e.g., Claude Desktop):
+The MCP tool can be integrated in a client like, Claude Desktop or Custom MCP client.
+
+#### MCP Client Configuration
 
 ```json
 {
@@ -71,7 +82,7 @@ Add this to your MCP client configuration (e.g., Claude Desktop):
 }
 ```
 
-### System Prompt
+#### Specific instructions
 
 We recommend using this system prompt in your MCP Client:
 
@@ -81,9 +92,27 @@ You are only allowed to make one tool call per request. In the returned search r
 
 This will prevent the MCP server from uncontrollably making API calls of its own volition, allowing the user to control how they want to search through the NASA Planetary Data System.
 
+#### MCP client software tested 
+
+#### Claude Desktop integration
+
+Connect our MCP server to Claude Desktop, as described in https://modelcontextprotocol.io/quickstart/user#installing-the-filesystem-server, using the following configuration:
+
+Create a project.
+
+Add the instructions above in the instructions section.
+
+Go to the newly created project and you can test with the example conversation above.
+
+#### Custom MCP client
+
+gradio, hugging face
+
 ## Development
 
 ### MCP Inspector (Debugging)
+
+
 
 ```bash
 npx @modelcontextprotocol/inspector python src/main.py
