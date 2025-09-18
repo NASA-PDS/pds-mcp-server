@@ -4,12 +4,11 @@ A Model Context Protocol (MCP) server that provides access to the NASA Planetary
 
 <img width="512" height="322" alt="image" src="https://github.com/user-attachments/assets/55d3b3ce-2ac2-4359-a23f-1b1d55efd648" />
 
-
 ## Overview
 
-This MCP server enables human-in-the-loop agentic search and exploration of NASA PDS data products, bundles, and collections through a simple interface. It directly integrates with the [NASA PDS Registry API](https://nasa-pds.github.io/pds-api/).
+The NASA PDS MCP server enables human-in-the-loop agentic search and exploration of NASA PDS data products, bundles, and collections through a simple interface, directly integrating with the [NASA PDS Registry API](https://nasa-pds.github.io/pds-api/).
 
-By open-sourcing this MCP server, we aim to support the researchers of the Planetary Data Science community by making it easier to access NASA PDS data. Our goal is to provide enhanced search capabilities that enable more effective data exploration and improve accessibility for future research endeavors.
+By open-sourcing this, We aim to support the researchers of the Planetary Data Science community enabling easy access to NASA PDS data for their future research endeavors.
 
 ## Features
 
@@ -50,12 +49,6 @@ pip install -r requirements.txt
 
 ## Usage
 
-We propose 3 usage for the PDS MCP services:
-- Standalone server
-- Integrated with a 3rd party client software or application (Claude Desktop, gradio, ...)
-
-
-
 ### Running the Server Standalone
 
 If you need to expose the MCP tools as a server, you can run it, standalone, as follows:
@@ -64,11 +57,7 @@ If you need to expose the MCP tools as a server, you can run it, standalone, as 
 python3.13 pds_mcp_server.py
 ```
 
-### Integrated with MCP client software 
-
-The MCP tool can be integrated in a client like, Claude Desktop or Custom MCP client.
-
-#### MCP Client Configuration
+### MCP Client Configuration (Claude Desktop, Cursor, or Custom MCP client)
 
 ```json
 {
@@ -82,37 +71,25 @@ The MCP tool can be integrated in a client like, Claude Desktop or Custom MCP cl
 }
 ```
 
-#### Specific instructions
+## Suggested Instructions
 
-We recommend using this system prompt in your MCP Client:
+We recommend using these instructions in your MCP Client:
 
 ```
 You are only allowed to make one tool call per request. In the returned search results, output the URNs (identifiers) as additional information alongside the result. After each message, you will propose to the user what next steps they can take and ask them to choose.
 ```
 
-This will prevent the MCP server from uncontrollably making API calls of its own volition, allowing the user to control how they want to search through the NASA Planetary Data System.
+This creates a human-in-the-loop agentic search conversation: allowing the user to control how they want to search through the NASA Planetary Data System.
 
-#### MCP client software tested 
+Example on how to set up in [Claude Desktop](./Claude_Desktop.md).
 
-#### Claude Desktop integration
+## Custom MCP Hosts
 
-Connect our MCP server to Claude Desktop, as described in https://modelcontextprotocol.io/quickstart/user#installing-the-filesystem-server, using the following configuration:
-
-Create a project.
-
-Add the instructions above in the instructions section.
-
-Go to the newly created project and you can test with the example conversation above.
-
-#### Custom MCP client
-
-gradio, hugging face
+To go beyond 3rd party MCP Hosts (Cursor, Claude Desktop, etc.), we have an example of a custom MCP Host built on Gradio UI, HuggingFace smolagents, and the OpenAI SDK. More [here](./src/gradio/README.md).
 
 ## Development
 
 ### MCP Inspector (Debugging)
-
-
 
 ```bash
 npx @modelcontextprotocol/inspector python src/main.py
