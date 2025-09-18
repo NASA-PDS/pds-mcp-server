@@ -8,3 +8,4 @@ smolagents>=1.21.3
 python-dotenv>=1.1.1
 requests>=2.32.3
 smolagents[openai]
+smolagents[mcp]
