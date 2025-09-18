@@ -4,60 +4,91 @@ A Model Context Protocol (MCP) server that provides access to the NASA Planetary
 
 https://github.com/user-attachments/assets/1d6b7035-c07a-4ca3-8bd2-9c19d68c3d5c
 
+
 ## Overview
 
-This MCP server enables AI assistants to search and explore NASA PDS data products, bundles, and collections through a simple interface. It directly integrates with the PDS Registry API at `https://pds.mcp.nasa.gov/api/search/1/`.
+The NASA PDS MCP server enables human-in-the-loop agentic search and exploration of NASA PDS data products, bundles, and collections through a simple interface, directly integrating with the [NASA PDS Registry API](https://nasa-pds.github.io/pds-api/).
 
-By open-sourcing this MCP server, we aim to support the researchers of the Planetary Data Science community by making it easier to access NASA PDS data. Our goal is to provide enhanced search capabilities that enable more effective data exploration and improve accessibility for future research endeavors.
+By open-sourcing this MCP server, we aim to support the researchers of the Planetary Data Science community enabling easy access to NASA PDS data for their future research endeavors.
 
 <img width="512" height="322" alt="image" src="https://github.com/user-attachments/assets/55d3b3ce-2ac2-4359-a23f-1b1d55efd648" />
 
 ## Features
 
-- **Product Search**: Search for PDS products using various filters
-- **Product Details**: Get detailed information about specific products from their XML label
-- **Hierarchy Navigation**: Explore product relationships (members, member-of)
-- **Product Classes**: List all available product classes (bundles, collections, observationals)
-- **Download Links**: Retrieve direct download URLs for product data files and associated resources
+- **Mission & Project Search**: Find space missions, investigations, and research projects with filtering by keywords and mission types
+- **Celestial Body Discovery**: Search for planets, moons, asteroids, comets, and other astronomical targets by name or type
+- **Spacecraft & Platform Search**: Locate spacecraft, rovers, landers, telescopes, and other instrument-carrying platforms
+- **Scientific Instrument Lookup**: Find cameras, spectrometers, detectors, and other scientific instruments used in space missions
+- **Data Collection Exploration**: Search and filter data collections by mission, target, instrument, or spacecraft relationships
+- **Product Relationship Mapping**: Discover connections between missions, targets, instruments, and data products
+- **Detailed Product Information**: Retrieve comprehensive metadata and details for specific PDS products using URN identifiers
+- **Reference Data Access**: Access categorized lists of target types, spacecraft types, instrument types, and mission types for filtering and discovery
+
+### Example Conversation
+
+1. Which instrument do seismic observations in the PDS?
+2. What is the identifier of the moon in the PDS?
+3. What data is collected from these instruments are targeting the Moon? (include URNs if need be)?
+4. What missions produced these observations?
 
 ## Installation
 
 1. Clone this repository:
 
 ```bash
-git clone https://github.com/NASA-PDS/pds-mcp.git
-cd pds-mcp
+git clone https://github.com/NASA-PDS/pds-mcp-server.git
+cd pds-mcp-server
 ```
 
 2. Install dependencies:
 
+Requires Python 3.13+.
+
 ```bash
+python3.13 -m venv {env-name}
+source {env-name}/bin/activate
 pip install -r requirements.txt
 ```
 
 ## Usage
 
-### Running the Server
+### Running the Server Standalone
+
+If you need to expose the MCP tools as a server, you can run it, standalone, as follows:
 
 ```bash
-python pds_mcp_server.py
+python3.13 pds_mcp_server.py
 ```
 
-### MCP Client Configuration
-
-Add this to your MCP client configuration (e.g., Claude Desktop):
+### MCP Client Configuration (Claude Desktop, Cursor, or Custom MCP client)
 
 ```json
 {
   "mcpServers": {
     "pds-registry": {
-      "command": "/path/to/python",
+      "command": "/path/to/{env-name}/bin/python3.13",
       "args": ["/path/to/pds_mcp_server.py"],
       "env": {}
     }
   }
 }
 ```
+
+## Suggested Instructions
+
+We recommend using these instructions in your MCP Client:
+
+```
+You are only allowed to make one tool call per request. In the returned search results, output the URNs (identifiers) as additional information alongside the result. After each message, you will propose to the user what next steps they can take and ask them to choose.
+```
+
+This creates a human-in-the-loop agentic search conversation: allowing the user to control how they want to search through the NASA Planetary Data System.
+
+Example on how to set up in [Claude Desktop](./Claude_Desktop.md).
+
+## Custom MCP Hosts
+
+To go beyond 3rd party MCP Hosts (Cursor, Claude Desktop, etc.), we have an example of a custom MCP Host built on Gradio UI, HuggingFace smolagents, and the OpenAI SDK. More [here](./src/gradio/README.md).
 
 ## Development
 

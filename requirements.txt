@@ -1,4 +1,11 @@
 fastmcp>=0.1.0
 httpx>=0.25.0
-pydantic>=2.0.0 
+pydantic>=2.0.0
 pyyaml>=6.0
+gradio>=5.44.1
+gradio_client>=1.12.1
+smolagents>=1.21.3
+python-dotenv>=1.1.1
+requests>=2.32.3
+smolagents[openai]
+smolagents[mcp]

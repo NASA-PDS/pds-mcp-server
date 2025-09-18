@@ -26,8 +26,27 @@ def build_search_url(base_url: str, params: SearchParams) -> str:
     if params.get("search_after"):
         query_params["search-after"] = ",".join(params["search_after"])
     if params.get("facet_fields"):
-        query_params["facet-fields"] = params["facet_fields"]
+        query_params["facet-fields"] = ",".join(params["facet_fields"])
     if params.get("facet_limit") is not None:
         query_params["facet-limit"] = params["facet_limit"]
     
     return fr"{base_url}?{"&".join(f"{k}={v}" for k, v in query_params.items() if v is not None)}"
+
+
+def clean_urn(urn: str) -> str:
+    """
+    Remove version information from PDS URN identifiers.
+    
+    Example: urn:nasa:pds:context:instrument:pse.a12a::1.1 -> urn:nasa:pds:context:instrument:pse.a12a
+    
+    Args:
+        urn (str): The URN identifier that may contain version information
+        
+    Returns:
+        str: The cleaned URN without version information
+    """
+    if not urn:
+        return urn
+    
+    # Split on '::' and take only the first part (the base URN)
+    return urn.split('::')[0]
