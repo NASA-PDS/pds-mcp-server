@@ -4,7 +4,13 @@ from mcp import StdioServerParameters
 from smolagents import ToolCallingAgent, MCPClient, OpenAIServerModel
 from gradio_smolagents_ui import GradioUI
 
+# Load environment variables from .env file
+# Requires OPENAI_API_KEY to be set in environment or .env file
 load_dotenv()
+
+# Check if required environment variables are set
+if not os.getenv("OPENAI_API_KEY"):
+    raise ValueError("OPENAI_API_KEY environment variable is required but not set")
 
 mcp_client = MCPClient(server_parameters=StdioServerParameters(
         command=os.getenv("PYTHON_PATH"),
@@ -16,6 +22,7 @@ mcp_client = MCPClient(server_parameters=StdioServerParameters(
 tools = mcp_client.get_tools()
 model = OpenAIServerModel(
   model_id="gpt-4.1-2025-04-14",
+  api_key=os.getenv("OPENAI_API_KEY")
 )
 
 
@@ -44,7 +51,7 @@ exploring detailed product information, or expanding to related missions/dataset
 """
 
 
-demo = GradioUI(agent, reset_agent_memory=False, enable_api_key_input=True)
+demo = GradioUI(agent, reset_agent_memory=False)
 demo.launch()
 
 mcp_client.disconnect()

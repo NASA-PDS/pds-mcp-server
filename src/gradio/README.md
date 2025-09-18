@@ -1,8 +1,12 @@
-# Gradio UI for NASA PDS MCP Server
+# Custom MCP Host for the NASA PDS MCP Server
 
-This directory contains the Gradio-based web interface for interacting with the NASA Planetary Data System (PDS) MCP server. The interface provides an intuitive chat-based UI for exploring NASA PDS data through an AI agent powered by HuggingFace's smolagents library.
+This directory contains the Gradio-based web interface for interacting with the NASA Planetary Data System (PDS) MCP server for exploring NASA planetary data through an AI agent powered by HuggingFace's smolagents library and the OpenAI SDK.
 
 <img width="800" alt="NASA PDS MCP Host Interface" src="images/NASA_PDS_MCP_Host.png" />
+
+This implementation serves as an example of a custom MCP Host, showing that this MCP server can go beyond 3rd party clients, and it can be integrated and configured for downstream applications.
+
+Ex: There is a suggested instructions prompt [here](./README.md) for the PDS MCP Server. This needs to be configured on the MCP client side.
 
 ## Overview
 
@@ -12,13 +16,6 @@ A simplified Gradio application specifically configured for the NASA PDS MCP ser
 - **Tool Discovery**: Automatically discovers and loads available PDS tools
 - **OpenAI Integration**: Uses OpenAI's GPT-4.1 model for agent reasoning
 - **Streaming Support**: Real-time response streaming for better user experience
-
-**Configuration:**
-
-- Uses environment variables for Python path and MCP server path
-- Configures agent with PDS-specific prompt templates
-- Enables API key input for secure model access
-- Sets up proper MCP client connection and cleanup
 
 ## Usage
 
@@ -46,8 +43,8 @@ python hf_gradio-pds.py
 
 The `hf_gradio-pds.py` file can be customized to:
 
-- Change the model (modify `model_id` in `OpenAIServerModel`)
-- Adjust agent parameters (max_steps, streaming options)
+- Change the model provider (modify `model_id` in `OpenAIServerModel`)
+- Adjust agent parameters (max_steps, streaming options) or type (`ToolCallingAgent` or `CodeAgent`)
 - Modify prompt templates for different use cases and instructions
 
 ### UI

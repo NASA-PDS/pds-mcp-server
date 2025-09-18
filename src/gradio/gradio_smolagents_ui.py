@@ -292,8 +292,6 @@ class GradioUI:
             If not provided, file uploads are disabled.
         reset_agent_memory (`bool`, *optional*, defaults to `False`): Whether to reset the agent's memory at the start of each interaction.
             If `True`, the agent will not remember previous interactions.
-        enable_api_key_input (`bool`, *optional*, defaults to `False`): Whether to enable API key input field in the UI.
-            If `True`, users can input their Anthropic API key directly in the interface.
 
     Raises:
         ModuleNotFoundError: If the `gradio` extra is not installed.
@@ -304,12 +302,12 @@ class GradioUI:
 
         model = InferenceClientModel(model_id="meta-llama/Meta-Llama-3.1-8B-Instruct")
         agent = CodeAgent(tools=[], model=model)
-        gradio_ui = GradioUI(agent, file_upload_folder="uploads", reset_agent_memory=True, enable_api_key_input=True)
+        gradio_ui = GradioUI(agent, file_upload_folder="uploads", reset_agent_memory=True)
         gradio_ui.launch()
         ```
     """
 
-    def __init__(self, agent: MultiStepAgent, file_upload_folder: str | None = None, reset_agent_memory: bool = False, enable_api_key_input: bool = False):
+    def __init__(self, agent: MultiStepAgent, file_upload_folder: str | None = None, reset_agent_memory: bool = False):
         if not _is_package_available("gradio"):
             raise ModuleNotFoundError(
                 "Please install 'gradio' extra to use the GradioUI: `pip install 'smolagents[gradio]'`"
@@ -317,66 +315,19 @@ class GradioUI:
         self.agent = agent
         self.file_upload_folder = Path(file_upload_folder) if file_upload_folder is not None else None
         self.reset_agent_memory = reset_agent_memory
-        self.enable_api_key_input = enable_api_key_input
         self.name = getattr(agent, "name") or "NASA PDS MCP Host"
         self.description = getattr(agent, "description", None)
         if self.file_upload_folder is not None:
             if not self.file_upload_folder.exists():
                 self.file_upload_folder.mkdir(parents=True, exist_ok=True)
 
-    def update_api_key(self, api_key, session_state):
-        """Update the API key in the session state and agent model if applicable."""
-        import gradio as gr
-        
-        if api_key and api_key.strip():
-            session_state["api_key"] = api_key.strip()
-            # If the agent has a model with an api_key attribute, update it
-            if hasattr(self.agent, 'model') and hasattr(self.agent.model, 'api_key'):
-                self.agent.model.api_key = api_key.strip()
-                # Reset the client so it gets recreated with the new key
-                if hasattr(self.agent.model, 'client'):
-                    self.agent.model.client = None
-                # Also reset any cached client_kwargs
-                if hasattr(self.agent.model, 'client_kwargs'):
-                    self.agent.model.client_kwargs['api_key'] = api_key.strip()
-            # Ensure environment variable is set for libraries that read from env
-            try:
-                os.environ["OPENAI_API_KEY"] = api_key.strip()
-            except Exception:
-                pass
-        return gr.Textbox(value="API key updated!", visible=True)
 
-    def interact_with_agent(self, prompt, messages, session_state, api_key=None):
+    def interact_with_agent(self, prompt, messages, session_state):
         import gradio as gr
 
         # Get the agent type from the template agent
         if "agent" not in session_state:
             session_state["agent"] = self.agent
-
-        # Update API key if provided
-        if api_key and api_key.strip():
-            self.update_api_key(api_key, session_state)
-
-        # Require an API key before proceeding
-        provided_api_key = session_state.get("api_key", "").strip()
-        if not provided_api_key:
-            # Do not append the user's message; block the interaction
-            raise gr.Error("API key required. Please enter your API key in the sidebar.")
-
-        # Ensure the model receives the provided key before any call
-        if hasattr(self.agent, 'model') and hasattr(self.agent.model, 'api_key'):
-            # Update key and reset any cached client so next call uses the new key
-            self.agent.model.api_key = provided_api_key
-            if hasattr(self.agent.model, 'client'):
-                self.agent.model.client = None
-            # Also reset any cached client_kwargs
-            if hasattr(self.agent.model, 'client_kwargs'):
-                self.agent.model.client_kwargs['api_key'] = provided_api_key
-        # Also (re)apply to environment for downstream libs
-        try:
-            os.environ["OPENAI_API_KEY"] = provided_api_key
-        except Exception:
-            pass
 
         try:
             messages.append(gr.ChatMessage(role="user", content=prompt, metadata={"status": "done"}))
@@ -439,7 +390,7 @@ class GradioUI:
 
         return gr.Textbox(f"File uploaded: {file_path}", visible=True), file_uploads_log + [file_path]
 
-    def log_user_message(self, text_input, file_uploads_log, api_key=None):
+    def log_user_message(self, text_input, file_uploads_log):
         import gradio as gr
 
         return (
@@ -451,7 +402,6 @@ class GradioUI:
             ),
             "",
             gr.Button(interactive=False),
-            api_key,  # Pass through the API key
         )
 
     def launch(self, share: bool = True, **kwargs):
@@ -480,29 +430,6 @@ class GradioUI:
                     + (f"\n\n**Agent description:**\n{self.description}" if self.description else "")
                 )
 
-                # API Key input section
-                if self.enable_api_key_input:
-                    with gr.Group():
-                        gr.Markdown("**API Configuration**", container=True)
-                        api_key_input = gr.Textbox(
-                            lines=1,
-                            label="API Key",
-                            container=False,
-                            placeholder="Enter your API key here",
-                            type="password",
-                            info="Enter your API key to use your selected model"
-                        )
-                        api_key_status = gr.Textbox(
-                            label="API Key Status", 
-                            interactive=False, 
-                            visible=False,
-                            value="No API key entered"
-                        )
-                        api_key_input.change(
-                            self.update_api_key,
-                            [api_key_input, session_state],
-                            [api_key_status]
-                        )
 
                 with gr.Group():
                     gr.Markdown("**Your request**", container=True)
@@ -547,14 +474,11 @@ class GradioUI:
             )
 
             # Set up event handlers
-            # Get the API key input if it exists, otherwise use None
-            api_key_input_component = api_key_input if self.enable_api_key_input else gr.State(None)
-            
             text_input.submit(
                 self.log_user_message,
-                [text_input, file_uploads_log, api_key_input_component],
-                [stored_messages, text_input, submit_btn, api_key_input_component],
-            ).then(self.interact_with_agent, [stored_messages, chatbot, session_state, api_key_input_component], [chatbot]).then(
+                [text_input, file_uploads_log],
+                [stored_messages, text_input, submit_btn],
+            ).then(self.interact_with_agent, [stored_messages, chatbot, session_state], [chatbot]).then(
                 lambda: (
                     gr.Textbox(
                         interactive=True, placeholder="Enter your prompt here and press Shift+Enter or the button"
@@ -567,9 +491,9 @@ class GradioUI:
 
             submit_btn.click(
                 self.log_user_message,
-                [text_input, file_uploads_log, api_key_input_component],
-                [stored_messages, text_input, submit_btn, api_key_input_component],
-            ).then(self.interact_with_agent, [stored_messages, chatbot, session_state, api_key_input_component], [chatbot]).then(
+                [text_input, file_uploads_log],
+                [stored_messages, text_input, submit_btn],
+            ).then(self.interact_with_agent, [stored_messages, chatbot, session_state], [chatbot]).then(
                 lambda: (
                     gr.Textbox(
                         interactive=True, placeholder="Enter your prompt here and press Shift+Enter or the button"
