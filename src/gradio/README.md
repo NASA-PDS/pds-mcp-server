@@ -34,14 +34,14 @@ OPENAI_API_KEY=your_openai_api_key_here
 ### Running the Gradio Interface
 
 ```bash
-python hf_gradio-pds.py
+python pds-mcp-client.py
 ```
 
 ## Customization
 
 ### Modifying the Agent
 
-The `hf_gradio-pds.py` file can be customized to:
+The `pds-mcp-client.py` file can be customized to:
 
 - Change the model provider (modify `model_id` in `OpenAIServerModel`)
 - Adjust agent parameters (max_steps, streaming options) or type (`ToolCallingAgent` or `CodeAgent`)
