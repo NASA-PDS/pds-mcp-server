@@ -19,6 +19,41 @@ source .venv/bin/activate
 pip install -e '.[research]'
 ```
 
+For a reproducible environment, install the exact, hash-verified dependency
+versions from the lock file instead:
+
+```bash
+pip install --require-hashes -r requirements.lock
+pip install --no-deps -e .
+```
+
+## Dependency lock files
+
+`pyproject.toml` holds the human-edited dependency ranges (`>=`) and
+`requirements.txt` holds the dependencies of the Gradio example host. The
+committed lock files pin every direct and transitive dependency to an exact
+version with SHA-256 hashes:
+
+| Lock file | Generated from | Contents |
+| --- | --- | --- |
+| `requirements.lock` | `pyproject.toml` | Runtime dependencies plus the `research` extra (pytest) |
+| `requirements-gradio.lock` | `requirements.txt` | Dependencies of the Gradio example host in `src/gradio` |
+
+The lock files are generated with [pip-tools](https://pip-tools.readthedocs.io/)
+on Python 3.13. After changing dependencies in `pyproject.toml` or
+`requirements.txt`, or to pick up newer releases, regenerate them and commit
+the result:
+
+```bash
+python3.13 -m venv /tmp/pip-tools-venv
+/tmp/pip-tools-venv/bin/pip install pip-tools
+/tmp/pip-tools-venv/bin/pip-compile --generate-hashes --extra research --no-header --no-annotate --strip-extras --upgrade --output-file requirements.lock pyproject.toml
+/tmp/pip-tools-venv/bin/pip-compile --generate-hashes --no-header --no-annotate --strip-extras --upgrade --output-file requirements-gradio.lock requirements.txt
+```
+
+Omit `--upgrade` to keep existing pinned versions and only add or remove
+entries for changed requirements.
+
 ## Run the MCP server
 
 After installing the package:
