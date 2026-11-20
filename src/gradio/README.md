@@ -21,7 +21,7 @@ A simplified Gradio application specifically configured for the NASA PDS MCP ser
 
 ### Prerequisites
 
-1. Install required dependencies from `requirements.txt`
+1. Install required dependencies from `requirements.txt`, or install the exact pinned versions with `pip install --require-hashes -r requirements-gradio.lock` (see [`DEVELOPMENT.md`](../../DEVELOPMENT.md))
 
 2. Set up environment variables in a `.env` file:
 
